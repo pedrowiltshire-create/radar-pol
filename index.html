@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Radar Político</title>
+  <style>
+    :root{
+      --bg:#070a08;
+      --bg2:#0b110d;
+      --card:rgba(0,0,0,.22);
+      --line:rgba(255,255,255,.10);
+      --text:rgba(255,255,255,.88);
+      --muted:rgba(255,255,255,.62);
+      --green:#19e26f;
+      --green2:#12c75f;
+      --shadow: 0 18px 50px rgba(0,0,0,.55);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", Helvetica;
+      color:var(--text);
+      background:
+        radial-gradient(900px 420px at 40% -10%, rgba(25,226,111,.16), transparent 70%),
+        radial-gradient(700px 420px at 80% 110%, rgba(25,226,111,.10), transparent 70%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      min-height:100vh;
+    }
+
+    /* subtle dotted pattern */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      background-image: radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px);
+      background-size: 12px 12px;
+      opacity:.08;
+      pointer-events:none;
+      mask-image: radial-gradient(800px 420px at 65% 65%, #000 30%, transparent 70%);
+    }
+
+    .container{
+      width:min(1100px, 100%);
+      margin:0 auto;
+      padding:22px 18px 40px;
+    }
+
+    .shell{
+      border-radius:var(--radius);
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    /* top bar */
+    header{
+      padding:22px 24px 10px;
+      text-align:center;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      margin-bottom:10px;
+    }
+
+    .logo{
+      width:44px; height:44px;
+      border-radius:50%;
+      border:1px solid rgba(25,226,111,.35);
+      position:relative;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(25,226,111,.18), transparent 55%),
+        rgba(0,0,0,.35);
+    }
+    .logo:after{
+      content:"";
+      position:absolute;
+      width:24px; height:2px;
+      left:10px; top:22px;
+      background:linear-gradient(90deg, transparent, var(--green), transparent);
+      transform:rotate(-12deg);
+      opacity:.9;
+    }
+
+    h1{
+      margin:0;
+      letter-spacing:.08em;
+      font-weight:900;
+      font-size: clamp(22px, 2.8vw, 42px);
+      text-transform:uppercase;
+    }
+    h1 span{ color:var(--green); }
+
+    .subtitle{
+      margin:8px auto 0;
+      max-width: 900px;
+      color:var(--muted);
+      line-height:1.45;
+      font-size: 13px;
+    }
+
+    /* nav */
+    .nav{
+      margin-top:16px;
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+    }
+    .nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .nav button{
+      appearance:none;
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      padding:14px 16px;
+      color:rgba(255,255,255,.72);
+      font-weight:800;
+      font-size:13px;
+      border-bottom:2px solid transparent; /* sem glow */
+    }
+    .nav button[aria-selected="true"]{
+      color:#fff;
+      border-bottom-color: rgba(255,255,255,.18);
+    }
+    .nav button:hover{ color:#fff; }
+
+    /* content */
+    main{
+      padding:22px 24px 28px;
+    }
+
+    .panel{
+      display:none;
+      animation: fade .18s ease-out;
+    }
+    .panel.active{ display:block; }
+
+    @keyframes fade{
+      from{opacity:.0; transform:translateY(4px)}
+      to{opacity:1; transform:translateY(0)}
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .card{
+      border-radius:var(--radius);
+      border:1px solid rgba(255,255,255,.08);
+      background: var(--card);
+      overflow:hidden;
+      padding:18px;
+    }
+
+    .title-lg{
+      margin:0 0 12px;
+      font-size: clamp(18px, 2.2vw, 32px);
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      font-weight:900;
+      color:rgba(255,255,255,.92);
+    }
+    .title-lg .green{ color:rgba(25,226,111,.75); }
+
+    .copy{
+      color:rgba(255,255,255,.80);
+      line-height:1.65;
+      font-size:14px;
+      margin:0;
+    }
+    .copy .green{ color:var(--green); }
+
+    .kpis{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+    .kpi{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.18);
+      padding:12px 12px;
+    }
+    .kpi .label{
+      color:rgba(255,255,255,.62);
+      font-size:12px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+    .kpi .value{
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:.02em;
+    }
+
+    .hint{
+      text-align:center;
+      color:rgba(255,255,255,.55);
+      font-size:13px;
+      margin:6px 0 18px;
+    }
+
+    .features{
+      display:grid;
+      gap:14px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    .feature{
+      display:grid;
+      grid-template-columns: 42px 1fr;
+      gap:12px;
+      align-items:flex-start;
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.07);
+      background: rgba(0,0,0,.14);
+    }
+    .check{
+      width:34px; height:34px;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 50%),
+        linear-gradient(180deg, rgba(25,226,111,.95), rgba(18,199,95,.88));
+      display:grid;
+      place-items:center;
+      box-shadow: 0 10px 25px rgba(25,226,111,.16);
+    }
+    .check svg{ width:18px; height:18px; fill:#06210f; }
+    .feature p{
+      margin:0;
+      color:rgba(255,255,255,.80);
+      line-height:1.6;
+      font-size:14px;
+    }
+    .feature b{ color:#fff; font-weight:900; }
+
+    .cta{
+      display:flex;
+      justify-content:center;
+      margin-top:18px;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      font-weight:900;
+      font-size:16px;
+      padding:14px 26px;
+      border-radius:999px;
+      color:#04190c;
+      background: linear-gradient(180deg, var(--green), var(--green2));
+      box-shadow: 0 16px 40px rgba(25,226,111,.16);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .btn.secondary{
+      color:rgba(255,255,255,.88);
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:none;
+    }
+    .btn:hover{ filter:brightness(1.03); }
+    .btn:active{ transform:translateY(1px); }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      align-items:stretch;
+    }
+
+    .form-row{
+      display:grid;
+      gap:10px;
+      margin-top:8px;
+    }
+    .field{
+      display:grid;
+      gap:6px;
+    }
+    .field label{
+      font-size:12px;
+      font-weight:800;
+      color:rgba(255,255,255,.72);
+    }
+    .field input, .field select, .field textarea{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.20);
+      color:rgba(255,255,255,.88);
+      outline:none;
+    }
+    .field input::placeholder, .field textarea::placeholder{
+      color:rgba(255,255,255,.40);
+    }
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    .mapbox{
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      gap:12px;
+      min-height: 360px;
+    }
+    .mapfake{
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(700px 260px at 30% 20%, rgba(25,226,111,.18), transparent 60%),
+        linear-gradient(135deg, rgba(255,255,255,.06), rgba(0,0,0,.10));
+      position:relative;
+      overflow:hidden;
+    }
+    .mapfake:after{
+      content:"";
+      position:absolute; inset:-40px;
+      background-image: linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px),
+                        linear-gradient(0deg, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 44px 44px;
+      opacity:.22;
+      transform:rotate(8deg);
+    }
+    .mapbadges{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+    }
+    .badge{
+      min-width:120px;
+      text-align:center;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      padding:10px 10px;
+    }
+    .badge .name{
+      font-size:12px;
+      font-weight:900;
+      color:rgba(255,255,255,.75);
+      margin-bottom:6px;
+    }
+    .badge .num{
+      font-size:18px;
+      font-weight:900;
+      color:var(--green);
+    }
+
+    ol{
+      margin:0;
+      padding-left:18px;
+      color:rgba(255,255,255,.80);
+      line-height:1.65;
+      font-size:14px;
+    }
+
+    .phones{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    .phone{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.20);
+      padding:14px;
+      min-height: 180px;
+    }
+    .phone .topbar{
+      display:flex;
+      justify-content:space-between;
+      color:rgba(255,255,255,.55);
+      font-weight:800;
+      font-size:12px;
+      margin-bottom:10px;
+    }
+    .bubble{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      padding:10px 10px;
+      color:rgba(255,255,255,.78);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    @media (max-width: 980px){
+      main{ padding:18px 16px 24px; }
+      header{ padding:18px 16px 10px; }
+      .hero{ grid-template-columns: 1fr; }
+      .grid-2{ grid-template-columns: 1fr; }
+      .split{ grid-template-columns: 1fr; }
+      .phones{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="shell">
+      <header>
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <h1>RADAR <span>POLÍTICO</span></h1>
+        </div>
+
+        <p class="subtitle">
+          Plataforma completa para campanhas modernas: gestão de colaboradores, controle financeiro e
+          comunicação estratégica via WhatsApp — tudo em um só lugar.
+        </p>
+
+        <nav class="nav" aria-label="Navegação">
+          <ul>
+            <li><button class="tab" data-tab="visao" aria-selected="true">Visão Geral</button></li>
+            <li><button class="tab" data-tab="colaboradores" aria-selected="false">Colaboradores</button></li>
+            <li><button class="tab" data-tab="prestacao" aria-selected="false">Prestação de Contas</button></li>
+            <li><button class="tab" data-tab="comunicacao" aria-selected="false">Comunicação</button></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main>
+        <!-- VISÃO GERAL -->
+        <section id="visao" class="panel active" aria-label="Visão Geral">
+          <div class="hero">
+            <div class="card">
+              <h2 class="title-lg">
+                PLATAFORMA COMPLETA<br/>
+                <span class="green">GESTÃO DE CAMPANHAS</span>
+              </h2>
+              <p class="copy">
+                O <span class="green">Radar Político</span> é uma solução digital criada para apoiar candidatos,
+                partidos e equipes de campanha na organização, monitoramento e comunicação estratégica com
+                colaboradores e eleitores. A plataforma integra gestão de cadastros, automação da comunicação
+                e painéis de controle, oferecendo eficiência, transparência e maior alcance nas ações de campanha.
+              </p>
+
+              <div class="kpis" aria-hidden="true">
+                <div class="kpi">
+                  <div class="label">Operação</div>
+                  <div class="value">Organização & Monitoramento</div>
+                </div>
+                <div class="kpi">
+                  <div class="label">Comunicação</div>
+                  <div class="value">Estratégica via WhatsApp</div>
+                </div>
+                <div class="kpi">
+                  <div class="label">Gestão</div>
+                  <div class="value">Cadastros & Automação</div>
+                </div>
+                <div class="kpi">
+                  <div class="label">Resultado</div>
+                  <div class="value">Eficiência & Transparência</div>
+                </div>
+              </div>
+
+              <div class="cta">
+                <button class="btn secondary" type="button" data-go="prestacao">Ver prestação de contas</button>
+                <button class="btn" type="button" data-go="comunicacao">Ir para comunicação</button>
+              </div>
+            </div>
+
+            <div class="card" aria-hidden="true">
+              
+                
+                  
+                </div>
+                <div style="margin-top:10px; color:rgba(255,255,255,.70); font-size:14px; line-height:1.6;">
+                  
+                </div>
+               
+                  
+                   
+                  </div>
+                 
+                    
+                  </div>
+                  
+                    <div style="width:86%; height:100%; background:linear-gradient(90deg, rgba(25,226,111,.9), rgba(18,199,95,.65));"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- COLABORADORES -->
+        <section id="colaboradores" class="panel" aria-label="Cadastro de colaboradores">
+          <div class="hint">Cadastro de colaboradores</div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="font-weight:900; text-transform:uppercase; letter-spacing:.04em; font-size:12px; color:rgba(255,255,255,.78);">
+                  Cadastro Colaborador
+                </div>
+                <div style="font-size:12px; color:rgba(25,226,111,.70); font-weight:900;">Perfil do Cadastro*</div>
+              </div>
+
+              <div class="form-row">
+                <div class="split">
+                  <div class="field">
+                    <label><input type="radio" name="perfil" /> Líder</label>
+                  </div>
+                  <div class="field">
+                    <label><input type="radio" name="perfil" /> Colaborador</label>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Nome Completo*</label>
+                  <input placeholder="Nome completo" />
+                </div>
+
+                <div class="split">
+                  <div class="field">
+                    <label>Data de Nascimento*</label>
+                    <input placeholder=" / / " />
+                  </div>
+                  <div class="field">
+                    <label>Telefone</label>
+                    <input placeholder="(21) 99999-9999" />
+                  </div>
+                </div>
+
+                <div class="cta" style="justify-content:flex-start; margin-top:6px;">
+                  <button class="btn" type="button">Cadastrar</button>
+                  <button class="btn secondary" type="button">Limpar</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mapbox">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:900; text-transform:uppercase; letter-spacing:.04em; font-size:12px; color:rgba(255,255,255,.78);">
+                  Mapa com o Total de Cadastro
+                </div>
+                <div style="font-size:12px; color:rgba(255,255,255,.55); font-weight:800;">Visual</div>
+              </div>
+
+              <div class="mapfake" aria-hidden="true"></div>
+
+              <div class="mapbadges">
+                <div class="badge">
+                  <div class="name">Líder</div>
+                  <div class="num">3</div>
+                </div>
+                <div class="badge">
+                  <div class="name">Colaborador</div>
+                  <div class="num">2</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PRESTAÇÃO DE CONTAS -->
+        <section id="prestacao" class="panel" aria-label="Prestação de Contas">
+          <div class="hint">Simplifique sua conformidade e garanta transparência durante a campanha.</div>
+
+          <div class="features">
+            <div class="feature">
+              <div class="check" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9.0 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </div>
+              <p>
+                <b>Centralização e assinatura digital de contratos.</b>
+                Todos os contratos em um único lugar, com assinatura digital e trilhas de auditoria.
+              </p>
+            </div>
+
+            <div class="feature">
+              <div class="check" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9.0 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </div>
+              <p>
+                <b>Acompanhamento financeiro em tempo real.</b>
+                Entradas e saídas registradas automaticamente, dashboards e relatórios prontos para envio.
+              </p>
+            </div>
+
+            <div class="feature">
+              <div class="check" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9.0 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </div>
+              <p>
+                <b>Facilidade no envio de documentos rescisórios.</b>
+                Geração e envio organizado de rescisões e comprovantes, reduzindo retrabalho e prazos.
+              </p>
+            </div>
+
+            <div class="cta">
+              <button class="btn" type="button">Simule um Contrato</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- COMUNICAÇÃO -->
+        <section id="comunicacao" class="panel" aria-label="Comunicação (WhatsApp)">
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight:900; text-transform:uppercase; letter-spacing:.04em; font-size:12px; color:rgba(25,226,111,.80); margin-bottom:10px;">
+                Benefícios do uso do WhatsApp em campanhas eleitorais
+              </div>
+              <ol>
+                <li>Alcance imediato e massivo</li>
+                <li>Comunicação direta e personalizada</li>
+                <li>Segmentação eficiente de público</li>
+                <li>Alto engajamento</li>
+                <li>Custo muito baixo</li>
+                <li>Distribuição de conteúdos ricos</li>
+                <li>Mobilização rápida da equipe e dos apoiadores</li>
+                <li>Feedback instantâneo</li>
+                <li>Fortalecimento da base eleitoral</li>
+              </ol>
+            </div>
+
+            <div class="card">
+              <div style="font-weight:900; text-transform:uppercase; letter-spacing:.04em; font-size:12px; color:rgba(255,255,255,.78); margin-bottom:10px;">
+                Envio de WhatsApp
+              </div>
+
+              <div class="form-row">
+                <div class="split">
+                  <div class="field">
+                    <label>Data de Envio</label>
+                    <input placeholder="17/12/2025" />
+                  </div>
+                  <div class="field">
+                    <label>&nbsp;</label>
+                    <input placeholder="12:01" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Pessoas para Enviar</label>
+                  <select>
+                    <option>— Selecione —</option>
+                    <option>Líder</option>
+                    <option>Colaborador</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>WhatsApp</label>
+                  <input placeholder="(  )  _ _ _ _ _ - _ _ _ _" />
+                </div>
+
+                <div class="field">
+                  <label>Mensagem</label>
+                  <textarea rows="4" placeholder="Digite sua mensagem..."></textarea>
+                </div>
+
+                <div class="cta" style="justify-content:flex-start;">
+                  <button class="btn" type="button">Enviar</button>
+                  <button class="btn secondary" type="button">Pré-visualizar</button>
+                </div>
+
+                <div class="phones" aria-hidden="true">
+                  <div class="phone">
+                    <div class="topbar"><span>Comício da Vitória</span><span>19:37</span></div>
+                    <div class="bubble">
+                      Total de Registros<br/><b style="color:rgba(255,255,255,.92)">756</b><br/><br/>
+                      Tipo de Entrada
+                    </div>
+                  </div>
+                  <div class="phone">
+                    <div class="topbar"><span>WhatsApp</span><span>8:27</span></div>
+                    <div class="bubble">
+                      Campanha líder Coroa<br/>
+                      Vitória Coroa Pereira, pelo seu apoio...<br/><br/>
+                      Clique no link para fazer...
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const panels = Array.from(document.querySelectorAll(".panel"));
+
+    function openTab(id){
+      panels.forEach(p => p.classList.toggle("active", p.id === id));
+      tabs.forEach(t => t.setAttribute("aria-selected", String(t.dataset.tab === id)));
+      history.replaceState(null, "", "#" + id);
+    }
+
+    tabs.forEach(btn => btn.addEventListener("click", () => openTab(btn.dataset.tab)));
+
+    // quick navigation buttons
+    document.querySelectorAll("[data-go]").forEach(el=>{
+      el.addEventListener("click", ()=>openTab(el.getAttribute("data-go")));
+    });
+
+    // open from hash
+    const hash = (location.hash || "").replace("#","");
+    if(hash && panels.some(p=>p.id===hash)) openTab(hash);
+  </script>
+</body>
+</html>
